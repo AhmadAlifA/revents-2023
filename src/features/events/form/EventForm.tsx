@@ -1,18 +1,17 @@
 import { ChangeEvent, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Form, Header, Segment } from "semantic-ui-react";
-import { AppEvent } from "../../../app/types/event";
+import { useAppDispatch, useAppSelector } from "../../../app/store/strore";
+import { creatEvent, updateEvent } from "../../form/eventSlice";
 import { createId } from "@paralleldrive/cuid2";
 
-type Props = {
-    setFormOpen: (value: boolean) => void;
-    addEvent: (event: AppEvent) => void;
-    selectedEvent: AppEvent | null;
-    updateEvent: (event: AppEvent) => void;
-}
+export default function EventForm() {
+    let {id} = useParams();
+    const event = useAppSelector(state => state.events.events.find(e => e.id === id));
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
-export default function EventForm({setFormOpen, addEvent, selectedEvent, updateEvent}: Props) {
-
-    const initialValues = selectedEvent ?? {
+    const initialValues = event ?? {
         title: '',
         category: '',
         description: '',
@@ -24,10 +23,11 @@ export default function EventForm({setFormOpen, addEvent, selectedEvent, updateE
     const [values, setValues] = useState(initialValues);
 
     function onSubmit(){
-        selectedEvent 
-            ? updateEvent({...selectedEvent, ...values})
-            : addEvent({...values, id: createId(), hostedBy: 'bob', attendees: [], hostPhotoURL: ''});
-        setFormOpen(false);
+        id = id ?? createId();
+        event 
+            ? dispatch(updateEvent({...event, ...values}))
+            : dispatch(creatEvent({...values, id, hostedBy: 'bob', attendees: [], hostPhotoURL: ''}));
+        navigate(`/events/${id}`);
     }
 
     function handleInputChange(e: ChangeEvent<HTMLInputElement>){
@@ -37,7 +37,7 @@ export default function EventForm({setFormOpen, addEvent, selectedEvent, updateE
 
   return (
     <Segment clearing>
-            <Header content={selectedEvent ? 'Update Event' : 'Create Event'}/>
+            <Header content={event ? 'Update evet' : 'Create Event'}/>
             <Form onSubmit={onSubmit}>
                 <Form.Field>
                     <input type="text" 
@@ -78,7 +78,7 @@ export default function EventForm({setFormOpen, addEvent, selectedEvent, updateE
                 </Form.Field>
 
                 <Button type="submit" floated="right" positive content='Submit'/>
-                <Button onClick={() => setFormOpen(false)} type='button' floated="right" content="Cancel"/>
+                <Button as={Link} to={'/events'} type='button' floated="right" content="Cancel"/>
             </Form>
     </Segment>
     )

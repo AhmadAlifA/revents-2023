@@ -1,15 +1,18 @@
 import { ItemGroup, SegmentGroup, Segment, Item, Icon, List, Button } from 'semantic-ui-react'
 import EventListAttendee from './EventListAttendee'
 import { AppEvent } from '../../../app/types/event'
+import { Link } from 'react-router-dom'
+import { useAppDispatch } from '../../../app/store/strore'
+import { deleteEvent } from '../../form/eventSlice'
 
 type Props = {
     event: AppEvent
-    selectEvent: (Event:AppEvent) => void
-    deleteEvent: (eventId: string) => void
 }
 
-export default function EventListItem({event, selectEvent, deleteEvent}: Props ) {
-  return (
+export default function EventListItem({event}: Props ) {
+  const dispatch = useAppDispatch();
+  
+    return (
     <SegmentGroup>
         <Segment>
             <ItemGroup>
@@ -37,8 +40,8 @@ export default function EventListItem({event, selectEvent, deleteEvent}: Props )
         </Segment>
         <Segment clearing>
             <span>{event.description}</span>
-            <Button color='red' floated='right' content='Delete' onClick={() => deleteEvent(event.id)}/> 
-            <Button color='teal' floated='right' content='view' onClick={() => selectEvent(event)}/> 
+            <Button onClick={() => dispatch(deleteEvent(event.id))} color='red' floated='right' content='Delete'/> 
+            <Button as={Link} to={`/events/${event.id}`} color='teal' floated='right' content='view' /> 
         </Segment>
     </SegmentGroup>
   )
